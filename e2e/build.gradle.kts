@@ -18,7 +18,19 @@ tasks {
             "yarn.lock")
 
     register<YarnTask>("e2e") {
-        dependsOn("yarn")
+        dependsOn("yarn", "composeUp")
+
+        inputs.files(javascriptRuntime)
+        inputs.dir("src")
+
+        args = listOf("run", "e2e")
+    }
+
+    register<YarnTask>("integrationTest") {
+        dependsOn("yarn", "::composeUp")
+
+        val envs = mapOf("PROTRACTOR_BASE_URL" to "http://localhost:8080")
+        setEnvironment(envs)
 
         inputs.files(javascriptRuntime)
         inputs.dir("src")

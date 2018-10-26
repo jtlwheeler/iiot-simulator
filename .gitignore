@@ -3,6 +3,7 @@ build/
 .vertx/
 node_modules/
 data-server/src/main/resources/assets/
+e2e/screenshots/
 
 # Created by https://www.gitignore.io/api/intellij
 
