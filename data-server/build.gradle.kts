@@ -1,17 +1,24 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath("com.bmuschko:gradle-docker-plugin:3.3.1")
+    }
+}
 
 plugins {
     java
     kotlin("jvm") version "1.2.71"
     id("io.vertx.vertx-plugin") version "0.1.0"
+    id("com.bmuschko.docker-remote-api") version "3.6.0"
 }
 
 version = "unspecified"
-
-repositories {
-    mavenCentral()
-    jcenter()
-}
 
 dependencies {
     compile(kotlin("stdlib-jdk8"))
@@ -30,32 +37,28 @@ tasks.withType<KotlinCompile> {
 }
 
 tasks {
-    "build" {
-        dependsOn("copyClientToServer")
+    "runShadow"{
+        dependsOn("assemble")
     }
 
-    "jar"(Jar::class) {
-        baseName = "data-server"
-        classifier = "fat"
-        version = project.version.toString()
-        manifest {
-            attributes(Pair("Manifest-Version", version))
-            attributes(Pair("Main-Class", "io.vertx.core.Launcher"))
-            attributes(Pair("Main-Verticle", "com.jwheeler.data.server.DataVerticle"))
-            attributes(Pair("Class-Path", "."))
-        }
-        exclude("META-INF/*.RSA", "META-INF/*.SF", "META-INF/*.DSA")
-        include("META-INF/services/io.vertx.core.spi.VerticleFactory")
+    "assemble" {
+        dependsOn("copyClientToServer")
     }
 
     register<Copy>("copyClientToServer") {
         dependsOn(":client:build")
 
         from("../client/build")
-        into("src/main/resources/assets/")
+        into("build/resources/main/assets")
+    }
+
+    register<DockerBuildImage>("dockerBuildImage") {
+        dependsOn("assemble")
+
+        inputDir = project.projectDir
+        tag = "jtlwheeler/data-server"
     }
 }
-
 
 vertx {
     mainVerticle = "com.jwheeler.data.server.DataVerticle"
