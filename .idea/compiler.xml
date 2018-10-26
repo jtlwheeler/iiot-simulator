@@ -2,6 +2,8 @@
 <project version="4">
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel>
+      <module name="client_main" target="1.8" />
+      <module name="client_test" target="1.8" />
       <module name="iiot-simulator_main" target="1.8" />
       <module name="iiot-simulator_test" target="1.8" />
       <module name="opc-device-server_main" target="1.8" />

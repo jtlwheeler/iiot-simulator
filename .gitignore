@@ -1,5 +1,8 @@
 build/
 .gradle/
+.vertx/
+node_modules/
+data-server/src/main/resources/assets/
 
 # Created by https://www.gitignore.io/api/intellij
 
