@@ -1,0 +1,3 @@
+rootProject.name = 'iiot-simulator'
+
+include "device-server"
