@@ -25,6 +25,7 @@ dependencies {
     compile("org.eclipse.milo:sdk-client:0.2.4")
     compile("io.vertx:vertx-core:3.5.4")
     compile("io.vertx:vertx-web:3.0.0")
+    compile("ch.qos.logback:logback-classic:1.1.7")
 
     testCompile("junit", "junit", "4.12")
 }

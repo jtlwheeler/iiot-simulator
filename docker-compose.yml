@@ -1,6 +1,16 @@
 version: '3'
 services:
-  web:
+  deviceserver:
+    image: jtlwheeler/device-server
+    ports:
+    - "12686:12686"
+  data_server:
     image: jtlwheeler/data-server
     ports:
     - "8080:8080"
+    links:
+    - deviceserver
+    environment:
+#    - "DEVICE_URL=opc.tcp://deviceserver:12686/example"
+    - "DEVICE_URL=opc.tcp://172.24.0.2:12686/example"
+
