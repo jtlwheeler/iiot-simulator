@@ -45,6 +45,8 @@ class DataVerticle : AbstractVerticle() {
     private fun getValve(routingContext: RoutingContext) {
         routingContext.response()
                 .putHeader("content-type", "application-json; charset=utf-8")
+                .putHeader("Access-Control-Allow-Origin", "*")
+                .putHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS")
                 .end(Json.encodePrettily(opcClient.valveInfo))
     }
 }

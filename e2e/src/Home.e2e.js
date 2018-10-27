@@ -5,10 +5,13 @@ describe("Home", function () {
         expect(browser.getTitle()).toBe("IIoT");
     });
 
-    it("should show the current status of the valve", function () {
+    it("should show the current status of the valve", async function () {
         browser.get("/");
 
         const valveStatus = element(by.css('.valve-status'));
-        expect(valveStatus.getText()).toBe('0');
+        await browser.wait(async () => valveStatus.isPresent()
+            , 10000);
+
+        expect(valveStatus.isPresent()).toBe(true);
     });
 });

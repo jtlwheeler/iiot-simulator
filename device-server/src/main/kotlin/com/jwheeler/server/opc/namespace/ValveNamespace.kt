@@ -5,9 +5,12 @@ import org.eclipse.milo.opcua.sdk.core.AccessLevel
 import org.eclipse.milo.opcua.sdk.core.Reference
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer
 import org.eclipse.milo.opcua.sdk.server.api.*
+import org.eclipse.milo.opcua.sdk.server.api.nodes.VariableNode
 import org.eclipse.milo.opcua.sdk.server.nodes.AttributeContext
 import org.eclipse.milo.opcua.sdk.server.nodes.UaFolderNode
 import org.eclipse.milo.opcua.sdk.server.nodes.UaVariableNode
+import org.eclipse.milo.opcua.sdk.server.nodes.delegates.AttributeDelegate
+import org.eclipse.milo.opcua.sdk.server.nodes.delegates.AttributeDelegateChain
 import org.eclipse.milo.opcua.sdk.server.util.SubscriptionModel
 import org.eclipse.milo.opcua.stack.core.Identifiers
 import org.eclipse.milo.opcua.stack.core.StatusCodes
@@ -21,6 +24,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.ThreadLocalRandom
 
 class ValveNamespace(private val server: OpcUaServer, private var namespaceIndex: UShort) : Namespace {
 
@@ -78,8 +82,24 @@ class ValveNamespace(private val server: OpcUaServer, private var namespaceIndex
 
         node.value = DataValue(Variant(0))
 
+
+        val delegate = AttributeDelegateChain.create(
+                object : AttributeDelegate {
+                    @Throws(UaException::class)
+                    override fun getValue(context: AttributeContext?, node: VariableNode): DataValue {
+                        return DataValue(Variant(createFakeValveStatus()))
+                    }
+                }
+        )
+
+        node.setAttributeDelegate(delegate)
+
         server.nodeMap.addNode(node)
         dynamicFolder.addOrganizes(node)
+    }
+
+    private fun createFakeValveStatus(): Int {
+        return ThreadLocalRandom.current().nextInt(0, 2)
     }
 
     override fun getNamespaceIndex(): UShort {

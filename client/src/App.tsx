@@ -2,22 +2,32 @@ import axios from 'axios';
 import * as React from 'react';
 
 interface IState {
-    valveState: number
+    lastRefresh?: Date
+    valveState?: number;
 }
 
 class App extends React.Component<any, IState> {
 
+    private interval: NodeJS.Timeout;
+
     constructor(props: any) {
         super(props);
         this.state = {
-            valveState: 0
+            lastRefresh: undefined,
+            valveState: undefined
         };
 
         this.getValveInfo = this.getValveInfo.bind(this);
     }
 
-    public async componentDidMount() {
-        await this.getValveInfo();
+    public componentDidMount() {
+        this.interval = setInterval(async () => await
+                this.getValveInfo()
+            , 2000);
+    }
+
+    public componentWillUnmount() {
+        clearInterval(this.interval);
     }
 
     public render() {
@@ -27,18 +37,24 @@ class App extends React.Component<any, IState> {
                     <h1 className="App-title">Welcome to React</h1>
                 </header>
 
-                <div>
-                    <h2>Valve Status</h2>
-                    <h3 className="valve-status">{this.state.valveState}</h3>
-                </div>
+                {this.state.valveState !== undefined && this.state.lastRefresh ?
+                    <div className="valve-status">
+                        <h2>Valve Status</h2>
+                        <h3>{this.state.valveState}</h3>
+                        <h3>{this.state.lastRefresh.toString()}</h3>
+                    </div>
+                    : undefined
+                }
             </div>
         );
     }
 
     private async getValveInfo() {
         const response = await axios.get("http://localhost:8080/api/valve");
-
-        this.setState({valveState: response.data.valveState});
+        this.setState({
+            lastRefresh: new Date(),
+            valveState: response.data.valveState
+        });
     }
 }
 
