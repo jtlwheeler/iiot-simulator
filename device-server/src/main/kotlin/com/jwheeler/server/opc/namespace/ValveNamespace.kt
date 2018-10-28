@@ -89,7 +89,6 @@ class ValveNamespace(private val server: OpcUaServer,
                 object : AttributeDelegate {
                     @Throws(UaException::class)
                     override fun getValue(context: AttributeContext?, node: VariableNode): DataValue {
-                        logger.info("Valve State: {}", valveSensor.state)
                         return DataValue(Variant(valveSensor.state.value))
                     }
                 }

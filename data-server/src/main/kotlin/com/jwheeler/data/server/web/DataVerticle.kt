@@ -1,6 +1,6 @@
-package com.jwheeler.data.server
+package com.jwheeler.data.server.web
 
-import com.jwheeler.opc.client.OpcClient
+import com.jwheeler.data.server.external.Valve
 import io.vertx.core.AbstractVerticle
 import io.vertx.core.Future
 import io.vertx.core.json.Json
@@ -10,7 +10,7 @@ import io.vertx.ext.web.handler.StaticHandler
 
 class DataVerticle : AbstractVerticle() {
 
-    private val opcClient = OpcClient()
+    private val valve = Valve()
 
     override fun start(fut: Future<Void>) {
         val router = Router.router(vertx)
@@ -26,7 +26,7 @@ class DataVerticle : AbstractVerticle() {
         router.route("/static/*").handler(StaticHandler.create("assets/static"))
         router.route("/*").handler(StaticHandler.create("assets"))
 
-        opcClient.subscribe()
+        valve.subscribe()
 
         vertx
                 .createHttpServer()
@@ -46,7 +46,7 @@ class DataVerticle : AbstractVerticle() {
         routingContext.response()
                 .putHeader("content-type", "application-json; charset=utf-8")
                 .putHeader("Access-Control-Allow-Origin", "*")
-                .putHeader("Access-Control-Allow-Methods","GET, POST, OPTIONS")
-                .end(Json.encodePrettily(opcClient.valveInfo))
+                .putHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+                .end(Json.encodePrettily(ValveInfo(valve.valveStatus)))
     }
 }

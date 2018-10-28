@@ -62,5 +62,5 @@ tasks {
 }
 
 vertx {
-    mainVerticle = "com.jwheeler.data.server.DataVerticle"
+    mainVerticle = "com.jwheeler.data.server.web.DataVerticle"
 }

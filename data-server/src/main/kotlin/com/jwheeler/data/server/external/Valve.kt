@@ -1,7 +1,6 @@
-package com.jwheeler.opc.client
+package com.jwheeler.data.server.external
 
 import com.google.common.collect.Lists.newArrayList
-import com.jwheeler.data.server.ValveInfo
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient
 import org.eclipse.milo.opcua.sdk.client.api.config.OpcUaClientConfig
 import org.eclipse.milo.opcua.sdk.client.api.subscriptions.UaMonitoredItem
@@ -22,15 +21,19 @@ import java.io.File
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-class OpcClient {
+class Valve {
 
     private val endpointUrl = System.getenv("DEVICE_URL") ?: "opc.tcp://localhost:12686/example"
     private val logger = LoggerFactory.getLogger(javaClass)
     private val clientHandles = AtomicLong(1L)
     private lateinit var opcClient: OpcUaClient
 
+    var valveStatus = 0
+        private set
+
     init {
         createClient()
+//        subscribe()
     }
 
     @Throws(Exception::class)
@@ -86,10 +89,10 @@ class OpcClient {
 
         val parameters = MonitoringParameters(
                 clientHandle,
-                1000.0, // sampling interval
-                null, // filter, null means use default
-                uint(10), // queue size
-                true        // discard oldest
+                1000.0,
+                null,
+                uint(10),
+                true
         )
 
         val request = MonitoredItemCreateRequest(
@@ -117,13 +120,10 @@ class OpcClient {
         }
     }
 
-    var valveStatus = 0
-    var valveInfo = ValveInfo(0)
     private fun onSubscriptionValue(item: UaMonitoredItem, value: DataValue) {
         logger.info("subscription value received: item={}, value={}",
                 item.readValueId.nodeId, value.value)
 
         valveStatus = value.value.value as Int
-        valveInfo = ValveInfo(valveStatus)
     }
 }
