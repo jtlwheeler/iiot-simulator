@@ -1,6 +1,7 @@
 package com.jwheeler.server.opc.namespace
 
 import com.google.common.collect.Lists
+import com.jwheeler.server.sensor.ValveSensor
 import org.eclipse.milo.opcua.sdk.core.AccessLevel
 import org.eclipse.milo.opcua.sdk.core.Reference
 import org.eclipse.milo.opcua.sdk.server.OpcUaServer
@@ -24,12 +25,14 @@ import org.eclipse.milo.opcua.stack.core.types.structured.ReadValueId
 import org.eclipse.milo.opcua.stack.core.types.structured.WriteValue
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ThreadLocalRandom
 
-class ValveNamespace(private val server: OpcUaServer, private var namespaceIndex: UShort) : Namespace {
+class ValveNamespace(private val server: OpcUaServer,
+                     private var namespaceIndex: UShort)
+    : Namespace {
 
     private val logger = LoggerFactory.getLogger(javaClass)
     private var subscriptionModel: SubscriptionModel = SubscriptionModel(server, this)
+    private val valveSensor = ValveSensor()
 
     init {
 
@@ -80,14 +83,14 @@ class ValveNamespace(private val server: OpcUaServer, private var namespaceIndex
                 .setTypeDefinition(Identifiers.BaseDataVariableType)
                 .build()
 
-        node.value = DataValue(Variant(0))
-
+        node.value = DataValue(Variant(valveSensor.state))
 
         val delegate = AttributeDelegateChain.create(
                 object : AttributeDelegate {
                     @Throws(UaException::class)
                     override fun getValue(context: AttributeContext?, node: VariableNode): DataValue {
-                        return DataValue(Variant(createFakeValveStatus()))
+                        logger.info("Valve State: {}", valveSensor.state)
+                        return DataValue(Variant(valveSensor.state.value))
                     }
                 }
         )
@@ -96,10 +99,6 @@ class ValveNamespace(private val server: OpcUaServer, private var namespaceIndex
 
         server.nodeMap.addNode(node)
         dynamicFolder.addOrganizes(node)
-    }
-
-    private fun createFakeValveStatus(): Int {
-        return ThreadLocalRandom.current().nextInt(0, 2)
     }
 
     override fun getNamespaceIndex(): UShort {
